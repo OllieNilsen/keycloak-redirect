@@ -1,16 +1,17 @@
-var config, window, location, client;
+var config, window, lib, client;
 var EventEmitter = require('events').EventEmitter;
-var lib = require('../index.js');
 
 describe("UNIT keycloak-redirect index.js", function () {
   before(function () {
     config = {};
     global.window = {location: "WL"}
+    require('../index.js');
+    lib = global.window.keycloakRedirect;
 
     client = new EventEmitter;
     client.withCredentials = false;
-    client.open = sinon.spy();
-    client.send = sinon.spy();
+    client.open = sinon.stub();
+    client.send = sinon.stub();
   });
 
   describe('authenticate', function () {
@@ -66,7 +67,7 @@ describe("UNIT keycloak-redirect index.js", function () {
       it('should redirect if there is no "code" parameter.', function () {
         lib.authenticate(config, client);
         client.onerror();
-        expect(global.window.location).to.equal('keycloakUrl' + encodeURI("&redirect_uri=WL&client_id=clientId"));
+        expect(global.window.location).to.equal('keycloakUrl' + encodeURI("?response_type=code&scope=openid+email+profile&redirect_uri=WL&client_id=clientId"));
       });
       it('should not redirect if the "code" parameter is set', function () {
         global.window.location = "WL?code=abc";
